@@ -1,4 +1,5 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+export const MERCHANT_ID = import.meta.env.VITE_MERCHANT_ID ?? "1";
 
 const DASHBOARD_CACHE_TTL_MS = 1000;
 
@@ -11,7 +12,15 @@ const dashboardStore = {
 };
 
 async function fetchJson(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  const headers = new Headers(options.headers ?? {});
+  if (!headers.has("X-Merchant-Id")) {
+    headers.set("X-Merchant-Id", MERCHANT_ID);
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
   const payload = await response.json();
 
   if (!response.ok) {
@@ -77,4 +86,3 @@ export function createPayout(input) {
     body: JSON.stringify(input),
   });
 }
-
