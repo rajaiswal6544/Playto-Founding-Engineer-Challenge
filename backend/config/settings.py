@@ -98,6 +98,7 @@ else:
     ]
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "idempotency-key",
+    "x-merchant-id",
 ]
 
 REST_FRAMEWORK = {

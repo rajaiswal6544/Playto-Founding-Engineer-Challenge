@@ -1,3 +1,4 @@
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -57,3 +58,19 @@ class PayoutApiTests(APITestCase):
         self.assertIn("available_balance", response.data)
         self.assertIn("recent_ledger_entries", response.data)
         self.assertIn("payout_history", response.data)
+
+    @override_settings(CORS_ALLOW_ALL_ORIGINS=True)
+    def test_cors_preflight_allows_merchant_and_idempotency_headers(self):
+        response = self.client.options(
+            "/api/v1/payouts",
+            headers={
+                "Origin": "https://frontend.example.com",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type,x-merchant-id,idempotency-key",
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        allowed_headers = response.headers["access-control-allow-headers"].lower()
+        self.assertIn("x-merchant-id", allowed_headers)
+        self.assertIn("idempotency-key", allowed_headers)
