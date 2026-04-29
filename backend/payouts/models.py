@@ -51,15 +51,15 @@ class LedgerEntry(models.Model):
                 check=models.Q(payout__isnull=True)
                 | models.Q(
                     entry_type__in=[
-                        EntryType.HOLD,
-                        EntryType.DEBIT,
-                        EntryType.RELEASE,
+                        "hold",
+                        "debit",
+                        "release",
                     ]
                 ),
                 name="ledger_payout_entries_allowed_types",
             ),
             models.CheckConstraint(
-                check=models.Q(payout__isnull=False) | models.Q(entry_type=EntryType.CREDIT),
+                check=models.Q(payout__isnull=False) | models.Q(entry_type="credit"),
                 name="ledger_generic_entries_must_be_credit",
             ),
             models.CheckConstraint(
@@ -72,17 +72,17 @@ class LedgerEntry(models.Model):
             ),
             models.UniqueConstraint(
                 fields=("payout",),
-                condition=models.Q(payout__isnull=False, entry_type=EntryType.HOLD),
+                condition=models.Q(payout__isnull=False, entry_type="hold"),
                 name="uniq_hold_entry_per_payout",
             ),
             models.UniqueConstraint(
                 fields=("payout",),
-                condition=models.Q(payout__isnull=False, entry_type=EntryType.DEBIT),
+                condition=models.Q(payout__isnull=False, entry_type="debit"),
                 name="uniq_debit_entry_per_payout",
             ),
             models.UniqueConstraint(
                 fields=("payout",),
-                condition=models.Q(payout__isnull=False, entry_type=EntryType.RELEASE),
+                condition=models.Q(payout__isnull=False, entry_type="release"),
                 name="uniq_release_entry_per_payout",
             ),
         ]
@@ -182,21 +182,21 @@ class Payout(models.Model):
             models.CheckConstraint(
                 check=(
                     (
-                        models.Q(status=Status.PENDING)
+                        models.Q(status="pending")
                         & models.Q(next_retry_at__isnull=True)
                         & models.Q(processing_started_at__isnull=True)
                     )
                     | (
-                        models.Q(status=Status.PROCESSING)
+                        models.Q(status="processing")
                         & models.Q(processing_started_at__isnull=False)
                     )
                     | (
-                        models.Q(status=Status.COMPLETED)
+                        models.Q(status="completed")
                         & models.Q(next_retry_at__isnull=True)
                         & models.Q(processing_started_at__isnull=True)
                     )
                     | (
-                        models.Q(status=Status.FAILED)
+                        models.Q(status="failed")
                         & models.Q(next_retry_at__isnull=True)
                         & models.Q(processing_started_at__isnull=True)
                     )
